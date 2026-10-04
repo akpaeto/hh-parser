@@ -3,17 +3,18 @@ package hh
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
+//http://localhost:8080/
+
 func SearchVacancies(query string) ([]Vacancy, error) {
-	url := "https://hh.ru/vacancies/" + strings.ReplaceAll(query, " ", "-")
-
-	resp, err := http.Get(url)
-
+	searchURL := "https://hh.ru/search/vacancy?text=NAME%3A" + url.QueryEscape(query)
+	resp, err := http.Get(searchURL)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +80,8 @@ func extractSalary(card *goquery.Selection) string {
 			return
 		}
 
-		if _, err := strconv.ParseInt(value, 10, 64); err != nil {
+		number, err := strconv.ParseInt(value, 10, 64)
+		if err != nil || number < 1000 {
 			return
 		}
 
