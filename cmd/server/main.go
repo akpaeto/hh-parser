@@ -27,7 +27,7 @@ func vaсanciesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vacancies, err := hh.SearchVacancies(query)
+	vacancies, err := hh.SearchVacancies(query, "")
 
 	if err != nil {
 		fmt.Println("ошибка парсера:", err)

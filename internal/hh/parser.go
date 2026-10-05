@@ -6,15 +6,30 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
+var cityAreas = map[string]string{
+	"Москва":          "1",
+	"Санкт-Петербург": "2",
+	"Барнаул":         "70",
+}
+
 //http://localhost:8080/
 
-func SearchVacancies(query string) ([]Vacancy, error) {
+func SearchVacancies(query string, city string) ([]Vacancy, error) {
 	searchURL := "https://hh.ru/search/vacancy?text=NAME%3A" + url.QueryEscape(query)
-	resp, err := http.Get(searchURL)
+
+	if area, ok := cityAreas[city]; ok {
+		searchURL += "&area" + area
+	}
+	client := http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	resp, err := client.Get(searchURL)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +47,7 @@ func SearchVacancies(query string) ([]Vacancy, error) {
 		return nil, err
 	}
 
-	var vacancies []Vacancy
+	vacancies := make([]Vacancy, 0)
 
 	doc.Find("[data-qa='serp-item__title-text']").Each(func(i int, s *goquery.Selection) {
 
